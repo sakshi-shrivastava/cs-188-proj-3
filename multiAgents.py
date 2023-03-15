@@ -75,7 +75,46 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        
+        #print("position: " + str(newPos))
+        #print("score: " + str(successorGameState.getScore()))
+        #print(type(newGhostStates))
+
+        gridSize = newFood.width * newFood.height
+
+        ghostDists = []
+        for ghostState in newGhostStates:
+            #print(ghostState)
+            """for coord in successorGameState.getGhostPositions(ghostState.index):
+                dist = manhattanDistance(newPos, coord)
+                ghostDists.append(dist)"""
+            ghostCoord = ghostState.configuration.pos #coordinates of ghost
+            dist = manhattanDistance(newPos, ghostCoord)
+            ghostDists.append(dist)
+        ghostEval = min(ghostDists) #nearest ghost
+        print(ghostDists)
+        print(ghostEval)
+        ghostEval = -100 * gridSize * ghostEval #punish for having a ghost too close"""
+
+        #newFoodEval = manhattanDistance(newFood.configuration.pos, newPos)
+        #print(newFood)
+
+        foodDists = []
+        foodCount = 0
+        for x in range(newFood.width):
+            for y in range(newFood.height):
+                if newFood[x][y]:
+                    foodDists.append(manhattanDistance(newPos, (x, y)))
+                foodCount = foodCount + 1
+        foodCountEval = -1 * 50 * foodCount #we want the number of foods left to make the evaluation lower
+        foodDistEval = -1 * min(foodDists) #aim to get closer to food
+
+        gettingPointsEval = successorGameState.getScore() #we want more points
+
+        return ghostEval + foodCountEval + foodDistEval + gettingPointsEval
+            
+
+        #return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
