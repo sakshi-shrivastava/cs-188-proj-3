@@ -80,38 +80,45 @@ class ReflexAgent(Agent):
         #print("score: " + str(successorGameState.getScore()))
         #print(type(newGhostStates))
 
+        currPos = currentGameState.getPacmanPosition()
         gridSize = newFood.width * newFood.height
 
-        ghostDists = []
-        for ghostState in newGhostStates:
-            #print(ghostState)
-            """for coord in successorGameState.getGhostPositions(ghostState.index):
-                dist = manhattanDistance(newPos, coord)
-                ghostDists.append(dist)"""
-            ghostCoord = ghostState.configuration.pos #coordinates of ghost
-            dist = manhattanDistance(newPos, ghostCoord)
-            ghostDists.append(dist)
-        ghostEval = min(ghostDists) #nearest ghost
-        print(ghostDists)   
-        print(ghostEval)
-        ghostEval = -100 * gridSize * ghostEval #punish for having a ghost too close"""
-
-        #newFoodEval = manhattanDistance(newFood.configuration.pos, newPos)
-        #print(newFood)
-
-        foodDists = []
         foodCount = 0
+        foodDists = []
+        ghostDists = []
+        minGhostDist = gridSize
+
+        foodEval = 0
+        ghostEval = 0
+
+
         for x in range(newFood.width):
             for y in range(newFood.height):
                 if newFood[x][y]:
-                    foodDists.append(manhattanDistance(newPos, (x, y)))
+                    foodDists.append(manhattanDistance(currPos, (x, y)))
                 foodCount = foodCount + 1
-        foodCountEval = -1 * 50 * foodCount #we want the number of foods left to make the evaluation lower
-        foodDistEval = -1 * min(foodDists) #aim to get closer to food
+        foodCountEval = gridSize - foodCount #-1 * (foodCount ** 2) #we want the number of foods left to make the evaluation lower
+        foodDistEval = 0
+        if len(foodDists) > 0:
+            foodDistEval =-1 * min(foodDists) #aim to get closer to food
 
-        gettingPointsEval = successorGameState.getScore() #we want more points
+        for ghostState in newGhostStates:
+            if ghostState.scaredTimer <= 0:
+                ghostCoord = ghostState.getPosition() #coordinates of ghost
+                dist = manhattanDistance(newPos, ghostCoord)
+                ghostDists.append(dist)
+        if len(ghostDists) > 0:
+            minGhost = min(ghostDists)
+            if minGhost < 10:
+                ghostEval = -1 * (minGhost ** 2)
 
-        return ghostEval + foodCountEval + foodDistEval + gettingPointsEval
+        gettingPointsEval = successorGameState.getScore() #we
+        #if gettingPointsEval < 0:
+        #    gettingPointsEval= (gettingPointsEval ** 2) * -1
+
+        #return ghostEval + foodCountEval + foodDistEval + gettingPointsEval + findFoodMotivator
+
+        return ghostEval + foodEval + gettingPointsEval + foodCountEval + foodDistEval
             
 
         #return successorGameState.getScore()
