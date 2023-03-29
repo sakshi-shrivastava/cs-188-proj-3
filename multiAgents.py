@@ -255,7 +255,39 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        return self.getExpectedValue(gameState,0, self.depth)[1]
+
+       
+    def getExpectedValue(self, game_state,agent_index, depth):
+        
+        
+        if game_state.isWin():
+            return [self.evaluationFunction(game_state), None]
+        if game_state.isLose():
+            return [self.evaluationFunction(game_state), None]
+        if depth == 0:
+            return [self.evaluationFunction(game_state), None]
+        
+        
+        move_legal1 = game_state.getLegalActions(agent_index)
+        
+        if agent_index != 0:
+            val= 0
+            bestAction = None
+            newIndex = agent_index + 1
+            prob = 1.0 * float(len(move_legal1))
+            
+            if newIndex == game_state.getNumAgents():
+                newIndex = 0
+                depth = depth - 1
+            for action in move_legal1:
+                successorState = game_state.generateSuccessor(agent_index, action)
+                value_expecti, _ = self.getExpectedValue(successorState, newIndex, depth)
+                val = val + value_expecti/ prob
+            return val, bestAction
+
+        
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
@@ -265,7 +297,25 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    newPosition = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhost = currentGameState.getGhostStates()
+    gameScore = currentGameState.getScore()    #current score of succesor state
+
+    if currentGameState.isWin():
+        return float("inf")
+    if currentGameState.isLose():
+        return float("-inf")
+    
+    #for each ghost find the distance from pacman 
+    # for ghost in newGhost:
+    #    if manhattanDistance(newPosition, ghost.getPosition()) > 0:
+
+    # Thought: If the ghost can be eaten, and the ghost is near, and the distance is small.
+    # In order to get a bigger score we divide the distance to a big number to get a higher score
+    #  If the ghost cannot be eaten, and the ghost is far, and the distance is big. We want to avoid 
+    # such situation so we subtract the distance to a big number to lower the score and avoid this state.
+          
 
 # Abbreviation
 better = betterEvaluationFunction
