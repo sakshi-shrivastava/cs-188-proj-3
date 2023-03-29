@@ -268,25 +268,43 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return [self.evaluationFunction(game_state), None]
         if depth == 0:
             return [self.evaluationFunction(game_state), None]
-        
-        
-        move_legal1 = game_state.getLegalActions(agent_index)
-        
-        if agent_index != 0:
-            val= 0
-            bestAction = None
-            newIndex = agent_index + 1
+        if game_state.getLegalActions(agent_index) == 0:
+           return [self.evaluationFunction(game_state), None]
+           
+       
+        if agent_index is not 0:
+            move_legal1 = game_state.getLegalActions(agent_index)
+            val= agent_index
+            ideal_action1 = Directions.STOP
+            newIndex = agent_index + 1*1
             prob = 1.0 * float(len(move_legal1))
-            
-            if newIndex == game_state.getNumAgents():
-                newIndex = 0
+            #flo = float("inf")
+            numAgents = game_state.getNumAgents()
+            index1 = (agent_index + 1) % numAgents
+            if newIndex == numAgents:
                 depth = depth - 1
-            for action in move_legal1:
-                successorState = game_state.generateSuccessor(agent_index, action)
-                value_expecti, _ = self.getExpectedValue(successorState, newIndex, depth)
+            for act in move_legal1:
+                successorState = game_state.generateSuccessor(agent_index, act)
+                value_expecti, _ = self.getExpectedValue(successorState, index1, depth)
                 val = val + value_expecti/ prob
-            return val, bestAction
+            return val, ideal_action1
+            
+           
 
+        if agent_index is 0:
+            Value_Max = float("-inf")
+            value = Value_Max
+            ideal_action2 = Directions.STOP
+            move_legal2 = game_state.getLegalActions(0)
+            index2 = (agent_index + 1) % game_state.getNumAgents()
+            for act in move_legal2:
+                successorState = game_state.generateSuccessor(0, act)
+                pac_score, _ = self.getExpectedValue(successorState, index2, depth)
+                if max(value, pac_score) == pac_score:
+                   value, ideal_action2 = pac_score, act
+            return (value, ideal_action2)
+        
+        #   util.raiseNotDefined()
         
 
 def betterEvaluationFunction(currentGameState: GameState):
